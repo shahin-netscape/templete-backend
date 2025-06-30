@@ -53,7 +53,6 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     console.error("OTP verification error:", error);
 
       return makeResponse(res, error.code || 500, false, error.message || "Something went wrong", error.data);
-
   }
 });
 
@@ -84,8 +83,6 @@ router.post('/reset-password', async (req: Request, res: Response) => {
     return makeResponse(res, error.code || 500, false, error.message || "Something went wrong");
   }
 });
-
-
 
 export const customerController = router;
 

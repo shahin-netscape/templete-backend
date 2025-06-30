@@ -53,7 +53,6 @@ export const createBooking = async (req: Request, res: Response) => {
     }
 }
 
-
 export const getBooking = async (req: Request, res: Response) => {
     try {
         const page = parseInt(req.query.page as string) || 1;
