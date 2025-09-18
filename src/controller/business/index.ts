@@ -126,6 +126,7 @@ export const createBusiness = async (req: RequestWithUser, res: Response) => {
                 category,
                 subcategory: Array.isArray(subcategory) ? subcategory : [subcategory]
             }
+            
         });
 
         return res.status(201).json({

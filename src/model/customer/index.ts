@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema<IUser>(
     verificationToken: {
       type: String
     },
+    refreshToken: {
+      type: String, // store current refresh token
+      default: null
+    }
   },
   { timestamps: true }
 );

@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { handleForgotPassword, handleOtpVerification, handleResendOtp, handleResetPassword, handleUserLogin, handleUserSignup } from "../../services/common";
+import { handleForgotPassword, handleOtpVerification, handleRefreshToken, handleResendOtp, handleResetPassword, handleUserLogin, handleUserSignup } from "../../services/common";
 import { makeResponse } from "../../lib/common";
 
 
@@ -20,13 +20,36 @@ router.post('/signup', async (req: Request, res: Response) => {
   }
   })
 
-
+//old api
+  // router.post('/login', async (req: Request, res: Response) => {
+  //   try {
+  //     const { token } = await handleUserLogin(req.body);
+  
+  //     return makeResponse(res, 200, true, "Login successful",{
+  //       token
+  //     });
+  
+  //   } catch (error: any) {
+  //     console.error("Login error:", error);
+  
+  //     return makeResponse(
+  //       res,
+  //       error.code || 500,
+  //       false,
+  //       error.message || "Something went wrong",
+  //       error.data
+  //     );
+  //   }
+  // });
+  
+// new api refresh token
   router.post('/login', async (req: Request, res: Response) => {
     try {
-      const { token } = await handleUserLogin(req.body);
+      const { accessToken, refreshToken } = await handleUserLogin(req.body);
   
       return makeResponse(res, 200, true, "Login successful",{
-        token
+        accessToken,
+        refreshToken
       });
   
     } catch (error: any) {
@@ -40,8 +63,7 @@ router.post('/signup', async (req: Request, res: Response) => {
         error.data
       );
     }
-  });
-  
+  }); 
 
 router.post('/verify-otp', async (req: Request, res: Response) => {
   try {
@@ -83,6 +105,26 @@ router.post('/reset-password', async (req: Request, res: Response) => {
     return makeResponse(res, error.code || 500, false, error.message || "Something went wrong");
   }
 });
+
+// Refresh token route
+// router.post("/refresh-token", async (req: Request, res: Response) => {
+//   try {
+//     const { refreshToken } = req.body;
+//     const tokens = await handleRefreshToken(refreshToken);
+//     return makeResponse(res, 200, true, "Tokens refreshed successfully", tokens);
+//   } catch (error: any) {
+//     return makeResponse(res, error.code || 500, false, error.message || "Something went wrong");
+//   }
+// });
+router.post('/refresh-token', async(req: Request, res: Response) => {
+   try{
+const {refreshToken} = req.body;
+const {tokens} = await handleRefreshToken(refreshToken);
+return makeResponse(res, 200, true, "Token Refresh successfully", tokens);
+   }catch(error: any){
+    return makeResponse(res,error.code || 500, false, error.message || 'Something went wrong', null)
+   }
+}) 
 
 export const customerController = router;
 

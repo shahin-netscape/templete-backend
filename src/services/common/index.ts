@@ -5,6 +5,25 @@ import User from "../../model/customer";
 import jwt from "jsonwebtoken";
 
 
+
+//....................  Helper to generate tokens ........................
+const generateTokens = (user: IUser) => {
+  const accessToken = jwt.sign(
+    { id: user._id, role: user.user_type },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "7d" }
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user._id, role: user.user_type },
+    process.env.JWT_REFRESH_SECRET as string,
+    { expiresIn: "30d" }
+  );
+
+  return { accessToken, refreshToken };
+};
+
+// .........................Sign up ...........................
 export const handleUserSignup = async (payload: any): Promise<IUser> => {
   const {
     username,
@@ -51,9 +70,13 @@ export const handleUserSignup = async (payload: any): Promise<IUser> => {
     otpExpires,
   });
 
+  // const tokens = generateTokens(newUser);
+  // newUser.refreshToken = tokens.refreshToken;
+
   await newUser.save();
 
   return newUser;
+  // return { ...newUser.toObject(), ...tokens };
 };
 
 export const handleUserLogin = async (payload : any) => {
@@ -78,7 +101,14 @@ export const handleUserLogin = async (payload : any) => {
     process.env.JWT_SECRET as string,
     { expiresIn: "7d" }
   );
-  return { user, token };
+
+  const tokens = generateTokens(user);
+  // Save refresh token in DB
+  user.refreshToken = tokens.refreshToken;
+  await user.save();
+
+  return { user, ...tokens };
+  // return { user, token };
 };
 
 
@@ -188,3 +218,39 @@ export const handleResetPassword = async (payload: any) => {
   return true;
 };
 
+
+// Refresh token handler
+// export const handleRefreshToken = async (refreshToken: string) => {
+//   if (!refreshToken) throw { code: 401, message: "Refresh token required" };
+
+//   const user = await User.findOne({ refreshToken }) as IUser | null;
+//   if (!user) throw { code: 403, message: "Invalid refresh token" };
+
+//   try {
+//     jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
+//     const tokens = generateTokens(user);
+//     user.refreshToken = tokens.refreshToken;
+//     await user.save();
+
+//     return tokens;
+//   } catch (err) {
+//     throw { code: 403, message: "Refresh token expired or invalid" };
+//   }
+// };
+
+export const handleRefreshToken = async(refreshToken: string) => {
+ if(!refreshToken) throw {code: 200, message:'Token is required'}
+const  user = await User.findOne({refreshToken}) as IUser | null;
+if(!user) throw {code: 403, message: 'Invalid token'}
+ try{
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
+  const tokens = generateTokens(user);
+  user.refreshToken = tokens.refreshToken;
+  await user.save();
+   return tokens;
+ }
+ catch(err){
+ throw {code: 403, message:'Refresh token expired or invalid'}
+ }
+
+}

@@ -17,5 +17,6 @@ export interface IUser extends Document {
   isVerified: boolean;
   resetPassword: boolean;
   verificationToken?: string;
+  refreshToken?: string;
 }
 

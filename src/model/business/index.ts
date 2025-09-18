@@ -98,7 +98,6 @@ const businessSchema = new mongoose.Schema<IBusiness>({
     }
     ]
 },
-
     { timestamps: true },
 );
 businessSchema.index({ 'location.coordinates': '2dsphere' });
